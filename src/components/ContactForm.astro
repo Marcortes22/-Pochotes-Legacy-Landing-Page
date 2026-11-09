@@ -1,0 +1,79 @@
+﻿---
+import { Send } from "@lucide/astro";
+import { ui, type Locale } from "../i18n/ui";
+
+interface Props {
+	locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale].form;
+const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
+---
+
+<form
+	id="contact-form"
+	class="grid gap-4 sm:grid-cols-2"
+	data-endpoint={endpoint}
+	data-ok={t.ok}
+	data-error={t.error}
+	data-sending={t.sending}
+>
+	<input type="hidden" name="_subject" value="Pochote's Legacy — consulta web" />
+	<input type="hidden" name="_template" value="table" />
+	<input type="hidden" name="_captcha" value="false" />
+	<div class="fl">
+		<input id="f-name" name="name" required autocomplete="name" placeholder=" " />
+		<label for="f-name">{t.name}</label>
+	</div>
+	<div class="fl">
+		<input id="f-email" type="email" name="email" required autocomplete="email" placeholder=" " />
+		<label for="f-email">{t.email}</label>
+	</div>
+	<div class="fl sm:col-span-2">
+		<textarea id="f-msg" name="message" rows="4" placeholder=" " class="resize-none"></textarea>
+		<label for="f-msg">{t.message}</label>
+	</div>
+
+	<input type="text" name="_honey" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+
+	<div class="flex flex-wrap items-center gap-x-5 gap-y-3 sm:col-span-2">
+		<button type="submit" id="send-btn" class="btn btn-shine bg-forest text-cream disabled:opacity-60">
+			<Send class="size-4" aria-hidden="true" />{t.send}
+		</button>
+		<p class="text-sm">{t.privacy}</p>
+		<p id="form-status" role="status" class="w-full font-medium empty:hidden"></p>
+	</div>
+</form>
+
+<script>
+	const form = document.getElementById("contact-form") as HTMLFormElement;
+	const status = document.getElementById("form-status")!;
+	const btn = document.getElementById("send-btn") as HTMLButtonElement;
+	const d = form.dataset;
+
+	form.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const data = new FormData(form);
+		if (data.get("_honey")) return;
+		if (!d.endpoint) {
+			status.textContent = d.error!;
+			return;
+		}
+		btn.disabled = true;
+		status.textContent = d.sending!;
+		try {
+			const r = await fetch(d.endpoint, {
+				method: "POST",
+				headers: { Accept: "application/json" },
+				body: data,
+			});
+			if (!r.ok) throw new Error();
+			status.textContent = d.ok!;
+			form.reset();
+		} catch {
+			status.textContent = d.error!;
+		} finally {
+			btn.disabled = false;
+		}
+	});
+</script>

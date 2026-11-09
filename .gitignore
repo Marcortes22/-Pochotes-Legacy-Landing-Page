@@ -16,6 +16,13 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.env*.local
+
+# private working docs (personal, family and financial data) - never publish
+docs/
+
+# vercel
+.vercel/
 
 # macOS-specific files
 .DS_Store
