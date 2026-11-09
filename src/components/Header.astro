@@ -1,0 +1,137 @@
+---
+import { Menu, X } from "@lucide/astro";
+import Logo from "./Logo.astro";
+import { ui, site, type Locale } from "../i18n/ui";
+
+interface Props {
+	locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale].nav;
+const other = locale === "es" ? "en" : "es";
+const otherHref = other === "es" ? "/" : "/en/";
+const links = [
+	["#casa", t.house],
+	["#alquiler", t.rent],
+	["#experiencias", t.experiences],
+	["#galeria", t.gallery],
+	["#ubicacion", t.location],
+	["#proximamente", t.soon],
+	["#contacto", t.contact],
+];
+---
+
+<header id="site-header" class="absolute inset-x-0 top-0 z-40 text-cream">
+	<div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-5 md:px-10">
+		<a href="#" class="group flex items-center gap-2.5" aria-label={site.name}>
+			<Logo class="h-8 w-auto transition-transform duration-500 group-hover:rotate-[-8deg]" />
+			<span class="font-heading text-xl font-semibold tracking-wide sm:text-2xl">{site.name}</span>
+		</a>
+
+		<nav aria-label="Principal" class="hidden items-center gap-7 text-[0.95rem] font-medium xl:flex">
+			{links.slice(0, 6).map(([href, label]) => <a href={href} class="nav-link py-1" data-spy={href.slice(1)}>{label}</a>)}
+		</nav>
+
+		<div class="flex items-center gap-3">
+			<a
+				href={otherHref}
+				hreflang={other}
+				lang={other}
+				class="rounded-full border border-cream/60 px-3.5 py-1.5 text-sm font-medium transition-colors hover:bg-cream hover:text-forest"
+			>
+				<span class="sm:hidden">{other.toUpperCase()}</span><span class="hidden sm:inline">{t.other}</span>
+			</a>
+			<a href="#contacto" class="btn hidden bg-cream !py-2 text-sm text-forest lg:inline-flex">{t.contact}</a>
+			<button
+				type="button"
+				id="menu-btn"
+				class="grid size-10 place-items-center rounded-full border border-cream/40 xl:hidden"
+				aria-expanded="false"
+				aria-controls="menu-panel"
+				aria-label={t.menu}
+			>
+				<Menu class="size-5" aria-hidden="true" />
+			</button>
+		</div>
+	</div>
+
+	<div id="menu-panel" hidden class="fixed inset-0 z-50 overflow-hidden bg-forest px-7 py-5 xl:hidden">
+		<div class="flex items-center justify-between">
+			<Logo class="h-8 w-auto text-sand" />
+			<button type="button" id="menu-close" class="grid size-10 place-items-center rounded-full border border-cream/40" aria-label={t.close}>
+				<X class="size-5" aria-hidden="true" />
+			</button>
+		</div>
+		<nav aria-label="Principal" class="mt-10 flex flex-col">
+			{
+				links.map(([href, label], i) => (
+					<a href={href} class="menu-link block border-b border-cream/15 py-3.5 font-heading text-3xl font-semibold" style={`--i:${i}`}>
+						{label}
+					</a>
+				))
+			}
+		</nav>
+		<a href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener" class="menu-link btn mt-8 bg-sand text-forest" style={`--i:${links.length}`}>WhatsApp {site.whatsappDisplay}</a>
+	</div>
+</header>
+
+<style>
+	#menu-panel:not([hidden]) {
+		animation: menu-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	}
+	#menu-panel:not([hidden]) .menu-link {
+		animation: menu-item 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+		animation-delay: calc(120ms + var(--i) * 50ms);
+	}
+	@keyframes menu-in {
+		from { clip-path: circle(0% at calc(100% - 40px) 40px); }
+		to { clip-path: circle(150% at calc(100% - 40px) 40px); }
+	}
+	@keyframes menu-item {
+		from { opacity: 0; transform: translateX(24px); }
+		to { opacity: 1; transform: none; }
+	}
+</style>
+
+<script>
+	const header = document.getElementById("site-header")!;
+	let last = 0;
+	const onScroll = () => {
+		const y = window.scrollY;
+		header.classList.toggle("scrolled", y > 80);
+		header.classList.toggle("hide", y > 500 && y > last + 4);
+		if (y < last - 4) header.classList.remove("hide");
+		last = y;
+	};
+	window.addEventListener("scroll", onScroll, { passive: true });
+	onScroll();
+
+	const spyLinks = document.querySelectorAll<HTMLAnchorElement>("[data-spy]");
+	const spy = new IntersectionObserver(
+		(entries) =>
+			entries.forEach((e) => {
+				if (!e.isIntersecting) return;
+				spyLinks.forEach((a) => a.setAttribute("aria-current", String(a.dataset.spy === e.target.id)));
+			}),
+		{ rootMargin: "-45% 0px -50% 0px" },
+	);
+	spyLinks.forEach((a) => {
+		const s = document.getElementById(a.dataset.spy!);
+		if (s) spy.observe(s);
+	});
+
+	const btn = document.getElementById("menu-btn")!;
+	const panel = document.getElementById("menu-panel")!;
+	const set = (open: boolean) => {
+		panel.hidden = !open;
+		btn.setAttribute("aria-expanded", String(open));
+		document.body.style.overflow = open ? "hidden" : "";
+		(open ? document.getElementById("menu-close") : btn)?.focus();
+	};
+	btn.addEventListener("click", () => set(true));
+	document.getElementById("menu-close")!.addEventListener("click", () => set(false));
+	panel.querySelectorAll(".menu-link").forEach((a) => a.addEventListener("click", () => set(false)));
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape" && !panel.hidden) set(false);
+	});
+</script>

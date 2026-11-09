@@ -1,0 +1,1086 @@
+﻿---
+import { Image } from 'astro:assets';
+import {
+  BedDouble,
+  Bath,
+  CookingPot,
+  Wifi,
+  Car,
+  Flame,
+  WashingMachine,
+  Trees,
+  Mountain,
+  Footprints,
+  Coffee,
+  MapPin,
+  ArrowRight,
+  Sprout,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  House,
+  DoorOpen,
+  Check,
+  Users,
+  Navigation,
+} from '@lucide/astro';
+import Header from './Header.astro';
+import Logo from './Logo.astro';
+import ContactForm from './ContactForm.astro';
+import { ui, site, type Locale } from '../i18n/ui';
+import terrazaVista from '../assets/images/terraza-vista.jpeg';
+import terrazaVertical from '../assets/images/terraza-vertical.jpeg';
+import frontal from '../assets/images/casa-frontal.jpeg';
+import lateral from '../assets/images/casa-lateral.jpeg';
+import lateral2 from '../assets/images/casa-lateral-2.jpeg';
+import aerea from '../assets/images/casa-aerea.jpeg';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const specIcons = {
+  rooms: BedDouble,
+  baths: Bath,
+  kitchen: CookingPot,
+  wifi: Wifi,
+  parking: Car,
+  grill: Flame,
+  laundry: WashingMachine,
+  hammocks: Trees,
+  view: Mountain,
+} as const;
+const expIcons = [Footprints, Coffee, Trees, Flame];
+const gallery = [
+  terrazaVista,
+  frontal,
+  lateral,
+  lateral2,
+  aerea,
+  terrazaVertical,
+];
+const words = [
+  ...Object.values(t.house.specs).map((s) => s[0]),
+  ...t.exp.items.map((i) => i.title),
+];
+const flies = Array.from({ length: 14 }, (_, i) => ({
+  x: (i * 37 + 11) % 96,
+  y: (i * 53 + 7) % 88,
+  d: (i * 7) % 9,
+  s: 4 + (i % 4) * 2,
+}));
+const rentOptions = [
+  { id: 'whole', icon: House, ...t.rent.whole },
+  { id: 'room', icon: DoorOpen, ...t.rent.room },
+];
+const minutes = (d: string) => parseInt(d.split('·')[1] ?? '0', 10);
+const maxMin = Math.max(...t.location.dist.map(([, d]) => minutes(d)));
+const waLink = `https://wa.me/${site.whatsapp}`;
+const mapQ = `${site.lat},${site.lon}`;
+const directions = `https://www.google.com/maps?q=${mapQ}`;
+const embed = `https://www.google.com/maps?q=${mapQ}&z=15&output=embed`;
+const coords = `${site.lat.toFixed(4)}° N · ${Math.abs(site.lon).toFixed(4)}° ${locale === 'es' ? 'O' : 'W'}`;
+const wrap = 'mx-auto max-w-7xl px-5 md:px-10';
+const sec = 'py-12 md:py-20';
+const waIcon =
+  'M12.04 2a9.9 9.9 0 0 0-8.5 14.9L2 22l5.27-1.38A9.9 9.9 0 1 0 12.04 2Zm0 1.8a8.1 8.1 0 1 1-4.2 15.03l-.3-.18-3.13.82.84-3.05-.2-.31A8.1 8.1 0 0 1 12.04 3.8Zm-3.2 3.7c-.2 0-.5.07-.76.35-.26.28-1 .97-1 2.37s1.02 2.75 1.16 2.94c.14.19 2 3.17 4.9 4.33 2.4.95 2.9.76 3.42.71.52-.05 1.68-.69 1.92-1.35.24-.66.24-1.23.17-1.35-.07-.12-.26-.19-.54-.33-.28-.14-1.68-.83-1.94-.92-.26-.1-.45-.14-.64.14-.19.28-.73.92-.9 1.1-.16.19-.33.21-.61.07-.28-.14-1.2-.44-2.28-1.4-.84-.75-1.41-1.68-1.58-1.96-.16-.28-.02-.43.12-.57.13-.13.28-.33.43-.5.14-.16.19-.28.28-.47.1-.19.05-.35-.02-.5-.07-.14-.64-1.55-.88-2.12-.23-.55-.47-.48-.64-.49h-.55Z';
+---
+
+<div id="progress" aria-hidden="true"></div>
+<Header locale={locale} />
+
+<main class="relative overflow-x-clip">
+  <!-- Hero -->
+  <section
+    class="relative isolate flex min-h-[100svh] items-end overflow-hidden rounded-b-[1.75rem] text-cream md:rounded-b-[3rem]"
+  >
+    <div class="parallax absolute inset-0 -z-20" data-speed="0.25">
+      <Image
+        src={terrazaVista}
+        alt={t.hero.alt}
+        width={1920}
+        widths={[800, 1280, 1920]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="hero-img h-full w-full object-cover"
+      />
+    </div>
+    <div
+      class="absolute inset-0 -z-10 bg-gradient-to-t from-forest via-forest/75 to-forest/45"
+    >
+    </div>
+    <div
+      class="absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-forest/85 to-transparent"
+    >
+    </div>
+    <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      {
+        flies.map((f) => (
+          <span
+            class="firefly"
+            style={`left:${f.x}%;top:${f.y}%;width:${f.s}px;height:${f.s}px;animation-delay:-${f.d}s`}
+          />
+        ))
+      }
+    </div>
+
+    <div class={`${wrap} w-full pb-8 pt-32 md:pb-12`}>
+      <p
+        class="tag on-dark rise [text-shadow:0_1px_10px_rgba(0,0,0,.6)]"
+        style="--d:150ms"
+      >
+        {t.hero.place}
+      </p>
+      <h1
+        class="mt-4 max-w-4xl text-[2.6rem] sm:text-6xl md:text-7xl lg:text-8xl [text-shadow:0_2px_24px_rgba(0,0,0,.45)]"
+      >
+        {
+          t.hero.title.split(' ').map((w, i) => (
+            <>
+              <span class="word" style={`--i:${i}`}>
+                {w}
+              </span>{' '}
+            </>
+          ))
+        }
+      </h1>
+      <p
+        class="rise mt-5 max-w-xl text-base font-medium [text-shadow:0_1px_14px_rgba(0,0,0,.6)] md:mt-6 md:text-xl"
+        style="--d:800ms"
+      >
+        {t.hero.lead}
+      </p>
+      <div class="rise mt-7 flex flex-wrap gap-2.5 sm:gap-3" style="--d:950ms">
+        <a href="#contacto" class="btn btn-shine bg-cream text-forest max-sm:!px-5"
+          >{t.hero.cta}<ArrowRight class="size-5" aria-hidden="true" /></a
+        >
+        <a
+          href="#casa"
+          class="btn border border-cream/60 text-cream hover:bg-cream/10 max-sm:!px-5"
+          >{t.nav.house}</a
+        >
+      </div>
+      <dl
+        class="glass rise mt-8 grid grid-cols-4 divide-x divide-cream/20 rounded-2xl md:mt-12"
+        style="--d:1100ms"
+      >
+        {
+          t.hero.stats.map(([n, label]) => (
+            <div class="px-2 py-3 text-center sm:px-4 md:py-5 md:text-left">
+              <dt
+                class="font-mono text-2xl font-medium leading-none text-sand md:text-4xl"
+                data-count={n}
+              >
+                {n}
+              </dt>
+              <dd class="mt-1.5 text-[0.7rem] leading-tight sm:text-sm">
+                {label}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <a
+      href="#intro"
+      class="absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-cream lg:block"
+      aria-label={t.nav.house}
+      ><ChevronDown class="size-6 animate-bounce" aria-hidden="true" /></a
+    >
+  </section>
+
+  <!-- Ribbon -->
+  <div class="overflow-hidden py-5 md:py-7" aria-hidden="true">
+    <div
+      class="marquee font-heading text-2xl font-semibold text-forest/80 md:text-4xl"
+    >
+      {
+        [0, 1].map(() => (
+          <div class="flex shrink-0 items-center">
+            {words.map((w) => (
+              <span class="flex items-center">
+                {w}
+                <Sprout class="mx-5 size-5 text-brown md:mx-8" />
+              </span>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- Intro -->
+  <section
+    id="intro"
+    class={`${wrap} relative grid items-center gap-10 pb-6 pt-6 md:grid-cols-12 md:pb-10 md:pt-12`}
+  >
+    <div class="blob -left-24 top-0 size-80 bg-sand"></div>
+    <div class="md:col-span-7 md:pr-6" data-reveal="left">
+      <h2 class="h-line text-[2.1rem] md:text-6xl">{t.intro.title}</h2>
+      <p class="mt-6 max-w-prose text-lg">{t.intro.p1}</p>
+      <p class="mt-4 max-w-prose">{t.intro.p2}</p>
+    </div>
+    <div class="hidden md:col-span-5 md:block">
+      <div class="frame-host scroll-zoom relative" data-reveal="zoom">
+        <Image
+          src={terrazaVertical}
+          alt={t.intro.alt}
+          width={800}
+          widths={[480, 800]}
+          sizes="40vw"
+          class="aspect-[5/4] w-full object-cover shadow-2xl shadow-forest/25 lg:aspect-[4/3]"
+        />
+        <span class="frame" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- House -->
+  <section id="casa" class={`${wrap} relative pb-12 pt-8 md:pb-20 md:pt-10`}>
+    <div
+      class="blob -right-24 top-1/3 size-96 bg-forest/30"
+      style="animation-delay:-6s"
+    >
+    </div>
+    <div class="grid items-center gap-10 md:grid-cols-12 md:gap-12">
+      <div class="relative pb-6 md:col-span-5" data-reveal="left">
+        <div class="frame-host scroll-zoom relative">
+          <Image
+            src={frontal}
+            alt={t.house.alt}
+            width={900}
+            widths={[480, 900]}
+            sizes="(min-width: 768px) 40vw, 92vw"
+            class="aspect-[16/11] w-full object-cover shadow-xl shadow-forest/25 md:aspect-[4/5]"
+          />
+          <span class="frame" aria-hidden="true"></span>
+        </div>
+        <div
+          class="float absolute -bottom-1 right-3 w-[42%] border-4 border-cream shadow-2xl shadow-forest/30 md:-right-6 md:w-[50%]"
+        >
+          <Image
+            src={lateral}
+            alt=""
+            width={500}
+            widths={[300, 500]}
+            sizes="(min-width: 768px) 20vw, 40vw"
+            class="aspect-[4/3] w-full object-cover"
+          />
+        </div>
+      </div>
+      <div class="md:col-span-7">
+        <div data-reveal>
+          <p class="tag mb-3">{t.hero.tags.house}</p>
+          <h2 class="h-line text-[2.1rem] md:text-6xl">{t.house.title}</h2>
+          <p class="mt-5 max-w-xl">{t.house.lead}</p>
+        </div>
+        <ul class="mt-7 grid grid-cols-2 gap-2.5 lg:grid-cols-3 md:gap-3">
+          {
+            Object.entries(t.house.specs).map(([key, [title, sub]], i) => {
+              const Icon = specIcons[key as keyof typeof specIcons];
+              return (
+                <li
+                  class="card card-hover-dark chamfer-sm flex items-center gap-3 bg-cream p-3 ring-1 ring-forest/10 md:flex-col md:items-start md:gap-2 md:p-5"
+                  data-reveal
+                  style={`--d:${(i % 3) * 80 + Math.floor(i / 3) * 60}ms`}
+                >
+                  <span class="icon-dot grid size-9 shrink-0 place-items-center rounded-full bg-sand/50 text-forest md:size-11">
+                    <Icon class="size-[18px] md:size-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p class="text-[0.92rem] font-medium leading-tight md:font-heading md:text-2xl md:font-semibold">
+                      {title}
+                    </p>
+                    <p class="mt-1 hidden text-sm md:block">{sub}</p>
+                  </div>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rent -->
+  <section id="alquiler" class={`${wrap} relative ${sec}`}>
+    <div class="grid gap-8 md:grid-cols-12 md:gap-12">
+      <div class="md:col-span-5" data-reveal="left">
+        <p class="tag mb-3">{t.hero.tags.rent}</p>
+        <h2 class="h-line text-[2.1rem] md:text-6xl">{t.rent.title}</h2>
+        <p class="mt-5 max-w-md text-lg">{t.rent.lead}</p>
+        <p class="mt-4 max-w-md">{t.rent.price}</p>
+        <a
+          href="#contacto"
+          class="btn btn-shine mt-6 hidden bg-forest text-cream md:inline-flex"
+          >{t.rent.cta}<ArrowRight class="size-5" aria-hidden="true" /></a
+        >
+      </div>
+      <div class="md:col-span-7" data-reveal="right">
+        <div
+          class="tabs bg-forest/10 ring-1 ring-forest/15"
+          role="tablist"
+          aria-label={t.rent.title}
+          data-active="0"
+        >
+          <span class="tab-ind" aria-hidden="true"></span>
+          {
+            rentOptions.map((o, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`tab-${o.id}`}
+                aria-controls={`panel-${o.id}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                tabindex={i === 0 ? 0 : -1}
+              >
+                {o.tab}
+              </button>
+            ))
+          }
+        </div>
+        {
+          rentOptions.map((o, i) => (
+            <div
+              role="tabpanel"
+              id={`panel-${o.id}`}
+              aria-labelledby={`tab-${o.id}`}
+              hidden={i !== 0}
+              class="card chamfer mt-4 bg-cream p-6 ring-1 ring-forest/10 md:p-8"
+            >
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                <span class="grid size-12 shrink-0 place-items-center rounded-full bg-forest text-sand">
+                  <o.icon class="bob size-6" aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 class="text-3xl md:text-4xl">{o.title}</h3>
+                  <p class="mt-2">{o.text}</p>
+                </div>
+              </div>
+              <div
+                class={`mt-6 grid gap-5 ${o.shared.length ? 'sm:grid-cols-2' : ''}`}
+              >
+                <div>
+                  <p class="font-mono text-xs font-medium">{t.rent.ownLabel}</p>
+                  <ul
+                    class={`mt-2.5 grid gap-2 ${o.shared.length ? '' : 'grid-cols-2'}`}
+                  >
+                    {o.own.map((x, k) => (
+                      <li class="flex items-start gap-2.5" style={`--i:${k}`}>
+                        <Check
+                          class="mt-1 size-4 shrink-0 text-forest"
+                          aria-hidden="true"
+                        />
+                        {x}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {o.shared.length > 0 && (
+                  <div>
+                    <p class="font-mono text-xs font-medium">
+                      {t.rent.sharedLabel}
+                    </p>
+                    <ul class="mt-2.5 grid gap-2">
+                      {o.shared.map((x, k) => (
+                        <li
+                          class="flex items-start gap-2.5"
+                          style={`--i:${k + 1}`}
+                        >
+                          <Users
+                            class="mt-1 size-4 shrink-0 text-forest"
+                            aria-hidden="true"
+                          />
+                          {x}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <ul class="mt-6 flex flex-wrap gap-2 border-t border-forest/15 pt-5">
+                {t.rent.terms.map((x) => (
+                  <li class="rounded-full bg-sand/45 px-3.5 py-1 font-mono text-xs font-medium">
+                    {x}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+        <a
+          href="#contacto"
+          class="btn btn-shine mt-5 bg-forest text-cream md:hidden"
+          >{t.rent.cta}<ArrowRight class="size-5" aria-hidden="true" /></a
+        >
+      </div>
+    </div>
+  </section>
+
+  <!-- Experiences -->
+  <section
+    id="experiencias"
+    class="on-dark grain relative isolate mx-3 overflow-hidden bg-forest text-cream panel md:mx-8"
+  >
+    <Image
+      src={aerea}
+      alt=""
+      width={1440}
+      widths={[720, 1440]}
+      sizes="100vw"
+      class="absolute inset-0 -z-10 h-full w-full object-cover opacity-[0.12] mix-blend-luminosity"
+    />
+    <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      {
+        flies
+          .slice(0, 9)
+          .map((f) => (
+            <span
+              class="firefly"
+              style={`left:${f.y}%;top:${f.x}%;width:${f.s}px;height:${f.s}px;animation-delay:-${f.d}s`}
+            />
+          ))
+      }
+    </div>
+    <div class={`${wrap} py-12 md:py-16`}>
+      <div data-reveal>
+        <p class="tag mb-3">{t.hero.tags.exp}</p>
+        <h2 class="h-line max-w-2xl text-[2.1rem] md:text-6xl">
+          {t.exp.title}
+        </h2>
+      </div>
+      <ul
+        class="mt-8 grid grid-cols-2 gap-2.5 md:mt-10 md:gap-4 lg:grid-cols-4"
+      >
+        {
+          t.exp.items.map((it, i) => {
+            const Icon = expIcons[i];
+            return (
+              <li
+                class="card rounded-2xl bg-cream/[0.07] p-4 ring-1 ring-inset ring-cream/15 hover:bg-cream/[0.12] md:p-6"
+                data-reveal
+                style={`--d:${i * 90}ms`}
+              >
+                <span class="icon-dot grid size-11 place-items-center rounded-full bg-sand/20 text-sand">
+                  <Icon
+                    class="bob size-5"
+                    aria-hidden="true"
+                    style={`animation-delay:-${i}s`}
+                  />
+                </span>
+                <h3 class="mt-4 text-2xl md:text-3xl">{it.title}</h3>
+                <p class="mt-1.5 text-sm leading-relaxed md:text-base">
+                  {it.text}
+                </p>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section id="galeria" class={sec}>
+    <div class={wrap} data-reveal>
+      <p class="tag mb-3">{t.hero.tags.gallery}</p>
+      <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+        <h2 class="h-line text-[2.1rem] md:text-6xl">{t.gallery.title}</h2>
+        <p class="max-w-sm">{t.gallery.note}</p>
+      </div>
+    </div>
+
+    <div
+      class="mt-6 md:mt-8"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={t.gallery.title}
+      data-reveal="zoom"
+    >
+      <ul
+        id="car-track"
+        class="car-pad no-scrollbar relative flex snap-x snap-mandatory gap-3 overflow-x-auto py-4 md:gap-5"
+        tabindex="0"
+      >
+        {
+          gallery.map((img, i) => (
+            <li
+              class="car-slide shrink-0 snap-center"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} / ${gallery.length}`}
+            >
+              <button
+                type="button"
+                class="gallery-btn frame-host group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-2xl shadow-forest/25 md:aspect-[16/10]"
+                aria-label={`${t.gallery.open}: ${t.gallery.items[i]}`}
+              >
+                <Image
+                  src={img}
+                  alt={t.gallery.items[i]}
+                  width={1400}
+                  widths={[600, 1000, 1400]}
+                  sizes="(min-width: 768px) 56vw, 84vw"
+                  loading={i < 2 ? 'eager' : 'lazy'}
+                  class="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.05]"
+                />
+                <span class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest/90 to-transparent p-4 pt-14 text-left text-cream md:p-6">
+                  <span class="font-heading text-xl font-semibold md:text-3xl">
+                    {t.gallery.items[i]}
+                  </span>
+                </span>
+                <span class="frame" aria-hidden="true" />
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+      <div class={`${wrap} mt-3 flex items-center gap-4`}>
+        <p class="font-mono text-sm font-medium" aria-live="polite">
+          <span id="car-now">1</span> / {gallery.length}
+        </p>
+        <div class="h-0.5 flex-1 overflow-hidden rounded-full bg-forest/15">
+          <div
+            id="car-bar"
+            class="h-full origin-left bg-forest transition-transform duration-500"
+            style={`transform:scaleX(${1 / gallery.length})`}
+          >
+          </div>
+        </div>
+        <button
+          type="button"
+          id="car-prev"
+          class="grid size-11 place-items-center rounded-full border border-forest transition-colors hover:bg-forest hover:text-cream"
+          aria-label={t.gallery.prev}
+          ><ChevronLeft class="size-5" aria-hidden="true" /></button
+        >
+        <button
+          type="button"
+          id="car-next"
+          class="grid size-11 place-items-center rounded-full bg-forest text-cream transition-colors hover:bg-forest/85"
+          aria-label={t.gallery.next}
+          ><ChevronRight class="size-5" aria-hidden="true" /></button
+        >
+      </div>
+    </div>
+  </section>
+
+  <dialog
+    id="lightbox"
+    class="m-auto max-h-[92vh] max-w-[94vw] overflow-hidden rounded-2xl bg-forest p-0 backdrop:bg-forest/90 backdrop:backdrop-blur-sm"
+  >
+    <form method="dialog" class="relative">
+      <button
+        class="btn absolute right-3 top-3 z-10 bg-cream !px-4 !py-2 text-forest"
+        autofocus>{t.gallery.close}</button
+      >
+      <img
+        id="lightbox-img"
+        alt=""
+        class="max-h-[92vh] max-w-[94vw] object-contain"
+      />
+    </form>
+  </dialog>
+
+  <!-- Location -->
+  <section id="ubicacion" class={`${wrap} relative ${sec}`}>
+    <div
+      class="blob -left-20 bottom-0 size-80 bg-sand"
+      style="animation-delay:-9s"
+    >
+    </div>
+    <div class="grid gap-8 md:grid-cols-12 md:gap-12">
+      <div class="md:col-span-5" data-reveal="left">
+        <p class="tag mb-3">{t.hero.tags.location}</p>
+        <h2 class="h-line text-[2.1rem] md:text-6xl">{t.location.title}</h2>
+        <p class="mt-5 text-lg">{t.location.lead}</p>
+        <p
+          class="mt-4 inline-flex items-start gap-2 rounded-2xl bg-sand/40 px-4 py-2.5 text-sm font-medium"
+        >
+          <Sprout class="mt-0.5 size-4 shrink-0" aria-hidden="true" />{
+            t.location.zone
+          }
+        </p>
+        <h3 class="mt-8 font-sans text-base font-semibold tracking-normal">
+          {t.location.distTitle}
+        </h3>
+        <dl class="mt-2 grid grid-cols-2 gap-x-5 md:grid-cols-1">
+          {
+            t.location.dist.map(([place, d], i) => (
+              <div class="border-b border-forest/15 py-2.5">
+                <div class="flex flex-col md:flex-row md:items-baseline md:justify-between md:gap-x-3">
+                  <dt class="text-[0.95rem] font-medium">{place}</dt>
+                  <dd class="font-mono text-xs">{d}</dd>
+                </div>
+                <div class="mt-1.5 h-1 overflow-hidden rounded-full bg-forest/10">
+                  <div
+                    class="dist-bar h-full rounded-full bg-gradient-to-r from-sand to-brown"
+                    style={`width:${Math.max(6, (minutes(d) / maxMin) * 100)}%;--i:${i}`}
+                  />
+                </div>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="mt-3 text-sm">{t.location.distNote}</p>
+      </div>
+      <div class="md:col-span-7" data-reveal="right">
+        <div
+          class="chamfer dot-grid relative h-[340px] w-full overflow-hidden bg-sand/40 shadow-xl shadow-forest/15 md:h-full md:min-h-[480px]"
+        >
+          <div
+            class="absolute inset-0 grid place-items-center"
+            aria-hidden="true"
+          >
+            <MapPin class="size-10 animate-bounce text-forest" />
+          </div>
+          <iframe
+            src={embed}
+            title={t.location.mapTitle}
+            class="absolute inset-0 h-full w-full border-0"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <div
+            class="glass absolute left-3 top-3 flex items-center gap-4 rounded-2xl py-2 pl-4 pr-2 text-cream"
+          >
+            <div>
+              <p class="text-sm font-semibold">Carmona, Nandayure</p>
+              <p class="font-mono text-[0.7rem]">{coords}</p>
+            </div>
+            <a
+              href={directions}
+              target="_blank"
+              rel="noopener"
+              class="btn bg-cream !px-4 !py-2 text-sm text-forest"
+            >
+              <Navigation class="size-4" aria-hidden="true" />{
+                t.location.directions
+              }
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Soon -->
+  <section
+    id="proximamente"
+    class="grain relative isolate mx-3 overflow-hidden bg-sand panel md:mx-8"
+  >
+    <div
+      class={`${wrap} grid items-center gap-8 py-12 md:grid-cols-12 md:py-16`}
+    >
+      <div class="md:col-span-8" data-reveal="left">
+        <p
+          class="inline-flex items-center gap-2 rounded-full border border-forest px-3 py-1 font-mono text-xs font-medium"
+        >
+          <span class="relative flex size-2"
+            ><span
+              class="absolute inline-flex size-full animate-ping rounded-full bg-forest opacity-60"
+            ></span><span
+              class="relative inline-flex size-2 rounded-full bg-forest"
+            ></span></span
+          >
+          {t.soon.badge}
+        </p>
+        <h2 class="h-line mt-5 text-[2.1rem] md:text-6xl">{t.soon.title}</h2>
+        <p class="mt-5 max-w-prose text-lg">{t.soon.p1}</p>
+        <p class="mt-3 max-w-prose">{t.soon.p2}</p>
+        <a href="#contacto" class="btn btn-shine mt-6 bg-forest text-cream"
+          >{t.soon.cta}<ArrowRight class="size-5" aria-hidden="true" /></a
+        >
+      </div>
+      <div
+        class="hidden justify-self-center md:col-span-4 md:block"
+        data-reveal="zoom"
+      >
+        <div class="relative grid size-64 place-items-center">
+          <span class="ring-pulse"></span><span
+            class="ring-pulse"
+            style="animation-delay:-2s"></span><span
+            class="ring-pulse"
+            style="animation-delay:-4s"></span>
+          <Logo class="float relative h-44 w-auto text-forest" />
+        </div>
+      </div>
+    </div>
+    <Logo
+      class="pointer-events-none absolute -bottom-6 -right-4 -z-10 h-40 w-auto text-forest/15 md:hidden"
+    />
+  </section>
+
+  <!-- Contact -->
+  <section id="contacto" class={`${wrap} relative ${sec}`}>
+    <div class="blob -right-16 top-10 size-80 bg-sand"></div>
+    <div class="grid gap-8 md:grid-cols-12 md:gap-12">
+      <div class="md:col-span-5" data-reveal="left">
+        <p class="tag mb-3">{t.hero.tags.contact}</p>
+        <h2 class="h-line text-[2.1rem] md:text-6xl">{t.form.title}</h2>
+        <p class="mt-5 text-lg">{t.form.lead}</p>
+        <ul class="mt-7 grid gap-3 sm:grid-cols-2 md:grid-cols-1">
+          <li>
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener"
+              class="card chamfer-sm flex items-center gap-4 bg-forest p-4 text-cream"
+            >
+              <span
+                class="icon-dot grid size-11 shrink-0 place-items-center rounded-full bg-sand text-forest"
+                ><svg
+                  viewBox="0 0 24 24"
+                  class="size-5"
+                  fill="currentColor"
+                  aria-hidden="true"><path d={waIcon}></path></svg
+                ></span
+              >
+              <span
+                ><span class="block font-semibold">{t.form.chat}</span><span
+                  class="font-mono text-xs">{site.whatsappDisplay}</span
+                ></span
+              >
+              <ArrowRight class="ml-auto size-5 shrink-0" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a
+              href={site.instagram}
+              target="_blank"
+              rel="noopener"
+              class="card card-hover-dark chamfer-sm flex items-center gap-4 bg-cream p-4 ring-1 ring-forest/10"
+            >
+              <span
+                class="icon-dot grid size-11 shrink-0 place-items-center rounded-full bg-sand/50"
+                ><svg
+                  viewBox="0 0 24 24"
+                  class="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                  ><rect x="3" y="3" width="18" height="18" rx="5"
+                  ></rect><circle cx="12" cy="12" r="4"></circle><circle
+                    cx="17.3"
+                    cy="6.7"
+                    r="1"
+                    fill="currentColor"
+                    stroke="none"></circle></svg
+                ></span
+              >
+              <span
+                ><span class="block font-semibold">Instagram</span><span
+                  class="font-mono text-xs">{site.instagramHandle}</span
+                ></span
+              >
+              <ArrowRight class="ml-auto size-5 shrink-0" aria-hidden="true" />
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="chamfer bg-cream/90 p-5 shadow-xl shadow-forest/10 ring-1 ring-forest/10 backdrop-blur md:col-span-7 md:p-8"
+        data-reveal="right"
+      >
+        <ContactForm locale={locale} />
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="mt-4 bg-forest text-cream">
+  <div class={`${wrap} grid gap-8 py-10 md:grid-cols-12 md:py-12`}>
+    <div class="flex items-center gap-4 md:col-span-5">
+      <Logo class="h-12 w-auto text-sand" />
+      <div>
+        <p class="font-heading text-2xl font-semibold">{site.name}</p>
+        <p class="text-sm">{t.footer.tagline}</p>
+      </div>
+    </div>
+    <nav
+      aria-label="Footer"
+      class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:col-span-4"
+    >
+      {
+        [
+          ['#casa', t.nav.house],
+          ['#alquiler', t.nav.rent],
+          ['#galeria', t.nav.gallery],
+          ['#ubicacion', t.nav.location],
+          ['#proximamente', t.nav.soon],
+          ['#contacto', t.nav.contact],
+        ].map(([h, l]) => (
+          <a href={h} class="nav-link w-fit">
+            {l}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="flex flex-col gap-2 text-sm md:col-span-3 md:items-end">
+      <a href={waLink} target="_blank" rel="noopener" class="nav-link w-fit"
+        >WhatsApp {site.whatsappDisplay}</a
+      >
+      <a
+        href={site.instagram}
+        target="_blank"
+        rel="noopener"
+        class="nav-link w-fit">{site.instagramHandle}</a
+      >
+    </div>
+  </div>
+  <div class="border-t border-cream/15">
+    <p class={`${wrap} py-4 text-xs`}>
+      © {new Date().getFullYear()}
+      {site.name}. {t.footer.rights}
+    </p>
+  </div>
+</footer>
+
+<a
+  id="fab"
+  href={waLink}
+  target="_blank"
+  rel="noopener"
+  aria-label={t.nav.fab}
+  class="fixed bottom-5 right-5 z-30 grid size-14 place-items-center rounded-full bg-forest text-cream shadow-xl shadow-forest/40"
+>
+  <span class="ping absolute inset-0 rounded-full bg-forest" aria-hidden="true"
+  ></span>
+  <svg
+    viewBox="0 0 24 24"
+    class="relative size-7"
+    fill="currentColor"
+    aria-hidden="true"><path d={waIcon}></path></svg
+  >
+</a>
+
+<style is:global>
+  .car-pad {
+    --sw: 84vw;
+    padding-inline: calc((100% - var(--sw)) / 2);
+  }
+  .car-slide {
+    width: var(--sw);
+  }
+  @media (min-width: 768px) {
+    .car-pad {
+      --sw: min(56vw, 900px);
+    }
+  }
+  dialog[open] {
+    animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+</style>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const touch = matchMedia('(hover: none)').matches;
+
+  // Reveal on scroll
+  const io = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      }),
+    { threshold: 0.12, rootMargin: '0px 0px -5% 0px' },
+  );
+  document
+    .querySelectorAll('[data-reveal]')
+    .forEach((el) => (reduce ? el.classList.add('is-in') : io.observe(el)));
+
+  // Hero counters
+  if (!reduce) {
+    document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+      const end = Number(el.dataset.count);
+      const t0 = performance.now() + 1200;
+      el.textContent = '0';
+      const tick = (now: number) => {
+        const p = Math.min(Math.max((now - t0) / 1000, 0), 1);
+        el.textContent = String(Math.round(end * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  // Scroll progress, hero parallax, floating WhatsApp button
+  const bar = document.getElementById('progress')!;
+  const para = document.querySelector<HTMLElement>('.parallax');
+  const fab = document.getElementById('fab')!;
+  const contact = document.getElementById('contacto')!;
+  let nearContact = false;
+  new IntersectionObserver(([e]) => (nearContact = e.isIntersecting), {
+    threshold: 0.2,
+  }).observe(contact);
+  let ticking = false;
+  const update = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+    if (para && !reduce && scrollY < innerHeight * 1.2)
+      para.style.setProperty(
+        '--py',
+        `${scrollY * Number(para.dataset.speed)}px`,
+      );
+    fab.classList.toggle('show', scrollY > innerHeight * 0.8 && !nearContact);
+    ticking = false;
+  };
+  addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    },
+    { passive: true },
+  );
+  update();
+
+  // Card spotlight (mouse) and centre-of-screen focus (touch)
+  document.querySelectorAll<HTMLElement>('.card').forEach((c) =>
+    c.addEventListener('pointermove', (e) => {
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      c.style.setProperty('--my', `${e.clientY - r.top}px`);
+    }),
+  );
+  if (touch) {
+    const focusIO = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) =>
+          e.target.classList.toggle('in-focus', e.isIntersecting),
+        ),
+      { rootMargin: '-40% 0px -40% 0px' },
+    );
+    document
+      .querySelectorAll('.card, .frame-host')
+      .forEach((el) => focusIO.observe(el));
+  }
+
+  // Rent tabs
+  const tablist = document.querySelector<HTMLElement>('[role="tablist"]')!;
+  const tabs = Array.from(
+    tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+  );
+  const selectTab = (i: number, focus = false) => {
+    tablist.dataset.active = String(i);
+    tabs.forEach((tb, k) => {
+      const on = k === i;
+      tb.setAttribute('aria-selected', String(on));
+      tb.tabIndex = on ? 0 : -1;
+      const panel = document.getElementById(tb.getAttribute('aria-controls')!)!;
+      panel.hidden = !on;
+      if (on) {
+        panel.classList.remove('enter');
+        void panel.offsetWidth;
+        panel.classList.add('enter');
+      }
+    });
+    if (focus) tabs[i].focus();
+  };
+  tabs.forEach((tb, i) => {
+    tb.addEventListener('click', () => selectTab(i));
+    tb.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        selectTab(
+          (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length,
+          true,
+        );
+      }
+    });
+  });
+
+  // Gallery carousel
+  const dlg = document.getElementById('lightbox') as HTMLDialogElement;
+  const big = document.getElementById('lightbox-img') as HTMLImageElement;
+  const track = document.getElementById('car-track')!;
+  const slides = Array.from(track.querySelectorAll<HTMLElement>('.car-slide'));
+  const now = document.getElementById('car-now')!;
+  const barEl = document.getElementById('car-bar')!;
+  let cur = 0;
+  const go = (i: number) => {
+    const s = slides[(i + slides.length) % slides.length];
+    track.scrollTo({
+      left: s.offsetLeft - (track.clientWidth - s.clientWidth) / 2,
+      behavior: reduce ? 'auto' : 'smooth',
+    });
+  };
+  const mark = () => {
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    let best = 0,
+      dist = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetLeft + s.clientWidth / 2 - mid);
+      if (d < dist) {
+        dist = d;
+        best = i;
+      }
+    });
+    cur = best;
+    slides.forEach((s, i) => s.classList.toggle('is-active', i === best));
+    now.textContent = String(best + 1);
+    barEl.style.transform = `scaleX(${(best + 1) / slides.length})`;
+  };
+  track.addEventListener('scroll', () => requestAnimationFrame(mark), {
+    passive: true,
+  });
+  let lastTouch = 0;
+  const hold = () => (lastTouch = Date.now());
+  ['pointerdown', 'wheel', 'touchmove'].forEach((ev) =>
+    track.addEventListener(ev, hold, { passive: true }),
+  );
+  document.getElementById('car-prev')!.addEventListener('click', () => {
+    hold();
+    go(cur - 1);
+  });
+  document.getElementById('car-next')!.addEventListener('click', () => {
+    hold();
+    go(cur + 1);
+  });
+  track.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      hold();
+      go(cur + 1);
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      hold();
+      go(cur - 1);
+    }
+  });
+  mark();
+  if (!reduce) {
+    let hovering = false,
+      visible = false;
+    new IntersectionObserver(([e]) => (visible = e.isIntersecting), {
+      threshold: 0.1,
+    }).observe(track);
+    track.addEventListener(
+      'pointerenter',
+      (e) => (hovering = e.pointerType === 'mouse'),
+    );
+    track.addEventListener('pointerleave', () => (hovering = false));
+    setInterval(() => {
+      if (visible && !hovering && !dlg.open && Date.now() - lastTouch > 4000)
+        go(cur + 1);
+    }, 3500);
+  }
+
+  // Lightbox
+  document.querySelectorAll<HTMLButtonElement>('.gallery-btn').forEach((b) =>
+    b.addEventListener('click', () => {
+      const img = b.querySelector('img')!;
+      big.src = img.currentSrc || img.src;
+      big.alt = img.alt;
+      dlg.showModal();
+    }),
+  );
+  dlg.addEventListener('click', (e) => {
+    if (e.target === dlg) dlg.close();
+  });
+</script>
