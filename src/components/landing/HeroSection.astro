@@ -1,0 +1,133 @@
+---
+import { Image } from 'astro:assets';
+import { ArrowRight, ChevronDown } from '@lucide/astro';
+import { ui, type Locale } from '../../i18n/ui';
+import terrazaVista from '../../assets/images/terraza-vista.jpeg';
+import { wrap, flies } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+---
+
+<section
+  class="relative isolate flex min-h-[100svh] items-end overflow-hidden rounded-b-[1.75rem] text-cream md:rounded-b-[3rem]"
+>
+  <div class="parallax absolute inset-0 -z-20" data-speed="0.25">
+    <Image
+      src={terrazaVista}
+      alt={t.hero.alt}
+      width={1920}
+      widths={[800, 1280, 1920]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="hero-img h-full w-full object-cover"
+    />
+  </div>
+  <div
+    class="absolute inset-0 -z-10 bg-gradient-to-t from-forest via-forest/45 to-forest/25"
+  >
+  </div>
+  <div
+    class="absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-forest/100 to-transparent"
+  >
+  </div>
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+    {
+      flies.map((f) => (
+        <span
+          class="firefly"
+          style={`left:${f.x}%;top:${f.y}%;width:${f.s}px;height:${f.s}px;animation-delay:-${f.d}s`}
+        />
+      ))
+    }
+  </div>
+
+  <div class={`${wrap} w-full pb-8 pt-32 md:pb-12`}>
+    <p
+      class="tag on-dark rise [text-shadow:0_1px_10px_rgba(0,0,0,.6)]"
+      style="--d:150ms"
+    >
+      {t.hero.place}
+    </p>
+    <h1
+      class="mt-4 max-w-4xl text-[2.6rem] sm:text-6xl md:text-7xl lg:text-8xl [text-shadow:0_2px_24px_rgba(0,0,0,.45)]"
+    >
+      {
+        t.hero.title.split(' ').map((w, i) => (
+          <>
+            <span class="word" style={`--i:${i}`}>
+              {w}
+            </span>{' '}
+          </>
+        ))
+      }
+    </h1>
+    <p
+      class="rise mt-5 max-w-xl text-base font-medium [text-shadow:0_1px_14px_rgba(0,0,0,.6)] md:mt-6 md:text-xl"
+      style="--d:800ms"
+    >
+      {t.hero.lead}
+    </p>
+    <div class="rise mt-7 flex flex-wrap gap-2.5 sm:gap-3" style="--d:950ms">
+      <a
+        href="#contacto"
+        class="btn btn-shine bg-cream text-forest max-sm:!px-5"
+        >{t.hero.cta}<ArrowRight class="size-5" aria-hidden="true" /></a
+      >
+      <a
+        href="#casa"
+        class="btn border border-cream/60 text-cream hover:bg-cream/10 max-sm:!px-5"
+        >{t.nav.house}</a
+      >
+    </div>
+    <dl
+      class="glass rise mt-8 grid grid-cols-4 divide-x divide-cream/20 rounded-2xl md:mt-12"
+      style="--d:1100ms"
+    >
+      {
+        t.hero.stats.map(([n, label]) => (
+          <div class="px-2 py-3 text-center sm:px-4 md:py-5 md:text-left">
+            <dt
+              class="font-mono text-2xl font-medium leading-none text-sand md:text-4xl"
+              data-count={n}
+            >
+              {n}
+            </dt>
+            <dd class="mt-1.5 text-[0.7rem] leading-tight sm:text-sm">
+              {label}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+  <a
+    href="#intro"
+    class="absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-cream lg:block"
+    aria-label={t.nav.house}
+    ><ChevronDown class="size-6 animate-bounce" aria-hidden="true" /></a
+  >
+</section>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hero counters
+  if (!reduce) {
+    document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+      const end = Number(el.dataset.count);
+      const t0 = performance.now() + 1200;
+      el.textContent = '0';
+      const tick = (now: number) => {
+        const p = Math.min(Math.max((now - t0) / 1000, 0), 1);
+        el.textContent = String(Math.round(end * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+</script>

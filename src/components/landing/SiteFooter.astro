@@ -1,0 +1,60 @@
+---
+import Logo from '../Logo.astro';
+import { ui, site, type Locale } from '../../i18n/ui';
+import { wrap, waLink } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const links = [
+  ['#casa', t.nav.house],
+  ['#alquiler', t.nav.rent],
+  ['#galeria', t.nav.gallery],
+  ['#ubicacion', t.nav.location],
+  ['#proximamente', t.nav.soon],
+  ['#contacto', t.nav.contact],
+];
+---
+
+<footer class="mt-4 bg-forest text-cream">
+  <div class={`${wrap} grid gap-8 py-10 md:grid-cols-12 md:py-12`}>
+    <div class="flex items-center gap-4 md:col-span-5">
+      <Logo class="h-12 w-auto text-sand" />
+      <div>
+        <p class="font-heading text-2xl font-semibold">{site.name}</p>
+        <p class="text-sm">{t.footer.tagline}</p>
+      </div>
+    </div>
+    <nav
+      aria-label="Footer"
+      class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:col-span-4"
+    >
+      {
+        links.map(([h, l]) => (
+          <a href={h} class="nav-link w-fit">
+            {l}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="flex flex-col gap-2 text-sm md:col-span-3 md:items-end">
+      <a href={waLink} target="_blank" rel="noopener" class="nav-link w-fit"
+        >WhatsApp {site.whatsappDisplay}</a
+      >
+      <a
+        href={site.instagram}
+        target="_blank"
+        rel="noopener"
+        class="nav-link w-fit">{site.instagramHandle}</a
+      >
+    </div>
+  </div>
+  <div class="border-t border-cream/15">
+    <p class={`${wrap} py-4 text-xs`}>
+      © {new Date().getFullYear()}
+      {site.name}. {t.footer.rights}
+    </p>
+  </div>
+</footer>

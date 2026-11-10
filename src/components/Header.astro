@@ -124,6 +124,7 @@ const links = [
 	const panel = document.getElementById("menu-panel")!;
 	const set = (open: boolean) => {
 		panel.hidden = !open;
+		header.classList.toggle("menu-open", open);
 		btn.setAttribute("aria-expanded", String(open));
 		document.body.style.overflow = open ? "hidden" : "";
 		(open ? document.getElementById("menu-close") : btn)?.focus();

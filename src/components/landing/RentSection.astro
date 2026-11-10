@@ -1,0 +1,164 @@
+---
+import { ArrowRight, House, DoorOpen, Check, Users } from '@lucide/astro';
+import { ui, type Locale } from '../../i18n/ui';
+import { wrap, sec } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const rentOptions = [
+  { id: 'whole', icon: House, ...t.rent.whole },
+  { id: 'room', icon: DoorOpen, ...t.rent.room },
+];
+---
+
+<section id="alquiler" class={`${wrap} relative ${sec}`}>
+  <div class="grid gap-8 md:grid-cols-12 md:gap-12">
+    <div class="md:col-span-5" data-reveal="left">
+      <p class="tag mb-3">{t.hero.tags.rent}</p>
+      <h2 class="h-line text-[2.1rem] md:text-6xl">{t.rent.title}</h2>
+      <p class="mt-5 max-w-md text-lg">{t.rent.lead}</p>
+      <p class="mt-4 max-w-md">{t.rent.price}</p>
+      <a
+        href="#contacto"
+        class="btn btn-shine mt-6 hidden bg-forest text-cream md:inline-flex"
+        >{t.rent.cta}<ArrowRight class="size-5" aria-hidden="true" /></a
+      >
+    </div>
+    <div class="md:col-span-7" data-reveal="right">
+      <div
+        class="tabs bg-forest/10 ring-1 ring-forest/15"
+        role="tablist"
+        aria-label={t.rent.title}
+        data-active="0"
+      >
+        <span class="tab-ind" aria-hidden="true"></span>
+        {
+          rentOptions.map((o, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${o.id}`}
+              aria-controls={`panel-${o.id}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              tabindex={i === 0 ? 0 : -1}
+            >
+              {o.tab}
+            </button>
+          ))
+        }
+      </div>
+      {
+        rentOptions.map((o, i) => (
+          <div
+            role="tabpanel"
+            id={`panel-${o.id}`}
+            aria-labelledby={`tab-${o.id}`}
+            hidden={i !== 0}
+            class="card chamfer mt-4 bg-cream p-6 ring-1 ring-forest/10 md:p-8"
+          >
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+              <span class="grid size-12 shrink-0 place-items-center rounded-full bg-forest text-sand">
+                <o.icon class="bob size-6" aria-hidden="true" />
+              </span>
+              <div>
+                <h3 class="text-3xl md:text-4xl">{o.title}</h3>
+                <p class="mt-2">{o.text}</p>
+              </div>
+            </div>
+            <div
+              class={`mt-6 grid gap-5 ${o.shared.length ? 'sm:grid-cols-2' : ''}`}
+            >
+              <div>
+                <p class="font-mono text-xs font-medium">{t.rent.ownLabel}</p>
+                <ul
+                  class={`mt-2.5 grid gap-2 ${o.shared.length ? '' : 'grid-cols-2'}`}
+                >
+                  {o.own.map((x, k) => (
+                    <li class="flex items-start gap-2.5" style={`--i:${k}`}>
+                      <Check
+                        class="mt-1 size-4 shrink-0 text-forest"
+                        aria-hidden="true"
+                      />
+                      {x}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {o.shared.length > 0 && (
+                <div>
+                  <p class="font-mono text-xs font-medium">
+                    {t.rent.sharedLabel}
+                  </p>
+                  <ul class="mt-2.5 grid gap-2">
+                    {o.shared.map((x, k) => (
+                      <li
+                        class="flex items-start gap-2.5"
+                        style={`--i:${k + 1}`}
+                      >
+                        <Users
+                          class="mt-1 size-4 shrink-0 text-forest"
+                          aria-hidden="true"
+                        />
+                        {x}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+            <ul class="mt-6 flex flex-wrap gap-2 border-t border-forest/15 pt-5">
+              {t.rent.terms.map((x) => (
+                <li class="rounded-full bg-sand/45 px-3.5 py-1 font-mono text-xs font-medium">
+                  {x}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      <a
+        href="#contacto"
+        class="btn btn-shine mt-5 bg-forest text-cream md:hidden"
+        >{t.rent.cta}<ArrowRight class="size-5" aria-hidden="true" /></a
+      >
+    </div>
+  </div>
+</section>
+
+<script>
+  const tablist = document.querySelector<HTMLElement>('[role="tablist"]')!;
+  const tabs = Array.from(
+    tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+  );
+  const selectTab = (i: number, focus = false) => {
+    tablist.dataset.active = String(i);
+    tabs.forEach((tb, k) => {
+      const on = k === i;
+      tb.setAttribute('aria-selected', String(on));
+      tb.tabIndex = on ? 0 : -1;
+      const panel = document.getElementById(tb.getAttribute('aria-controls')!)!;
+      panel.hidden = !on;
+      if (on) {
+        panel.classList.remove('enter');
+        void panel.offsetWidth;
+        panel.classList.add('enter');
+      }
+    });
+    if (focus) tabs[i].focus();
+  };
+  tabs.forEach((tb, i) => {
+    tb.addEventListener('click', () => selectTab(i));
+    tb.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        selectTab(
+          (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length,
+          true,
+        );
+      }
+    });
+  });
+</script>

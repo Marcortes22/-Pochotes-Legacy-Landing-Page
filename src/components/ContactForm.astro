@@ -17,6 +17,7 @@ const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
 	data-ok={t.ok}
 	data-error={t.error}
 	data-sending={t.sending}
+	data-limit={t.limit}
 >
 	<input type="hidden" name="_subject" value="Pochote's Legacy — consulta web" />
 	<input type="hidden" name="_template" value="table" />
@@ -34,7 +35,7 @@ const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
 		<label for="f-msg">{t.message}</label>
 	</div>
 
-	<input type="text" name="_honey" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+	<input type="text" name="_honey" tabindex="-1" autocomplete="off" class="absolute -left-[9999px] h-0 w-0 opacity-0" aria-hidden="true" />
 
 	<div class="flex flex-wrap items-center gap-x-5 gap-y-3 sm:col-span-2">
 		<button type="submit" id="send-btn" class="btn btn-shine bg-forest text-cream disabled:opacity-60">
@@ -51,10 +52,36 @@ const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
 	const btn = document.getElementById("send-btn") as HTMLButtonElement;
 	const d = form.dataset;
 
+	const MIN_FILL_MS = 3000;
+	const COOLDOWN_MS = 60_000;
+	const MAX_PER_HOUR = 3;
+	const KEY = "contact-form-sent";
+	const loadedAt = Date.now();
+
+	const recentSends = (): number[] => {
+		try {
+			const list: number[] = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+			return list.filter((t) => Date.now() - t < 3_600_000);
+		} catch {
+			return [];
+		}
+	};
+
 	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
+		if (btn.disabled) return;
 		const data = new FormData(form);
 		if (data.get("_honey")) return;
+		if (Date.now() - loadedAt < MIN_FILL_MS) {
+			status.textContent = d.error!;
+			return;
+		}
+		const sent = recentSends();
+		const last = sent[sent.length - 1] ?? 0;
+		if (sent.length >= MAX_PER_HOUR || Date.now() - last < COOLDOWN_MS) {
+			status.textContent = d.limit!;
+			return;
+		}
 		if (!d.endpoint) {
 			status.textContent = d.error!;
 			return;
@@ -70,6 +97,9 @@ const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
 			if (!r.ok) throw new Error();
 			status.textContent = d.ok!;
 			form.reset();
+			try {
+				localStorage.setItem(KEY, JSON.stringify([...sent, Date.now()]));
+			} catch {}
 		} catch {
 			status.textContent = d.error!;
 		} finally {

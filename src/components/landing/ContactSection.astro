@@ -1,0 +1,88 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import ContactForm from '../ContactForm.astro';
+import { ui, site, type Locale } from '../../i18n/ui';
+import { wrap, sec, waLink, waIcon } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+---
+
+<section id="contacto" class={`${wrap} relative ${sec}`}>
+  <div class="blob -right-16 top-10 size-80 bg-sand"></div>
+  <div class="grid gap-8 md:grid-cols-12 md:gap-12">
+    <div class="md:col-span-5" data-reveal="left">
+      <p class="tag mb-3">{t.hero.tags.contact}</p>
+      <h2 class="h-line text-[2.1rem] md:text-6xl">{t.form.title}</h2>
+      <p class="mt-5 text-lg">{t.form.lead}</p>
+      <ul class="mt-7 grid gap-3 sm:grid-cols-2 md:grid-cols-1">
+        <li>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener"
+            class="card chamfer-sm flex items-center gap-4 bg-forest p-4 text-cream"
+          >
+            <span
+              class="icon-dot grid size-11 shrink-0 place-items-center rounded-full bg-sand text-forest"
+              ><svg
+                viewBox="0 0 24 24"
+                class="size-5"
+                fill="currentColor"
+                aria-hidden="true"><path d={waIcon}></path></svg
+              ></span
+            >
+            <span
+              ><span class="block font-semibold">{t.form.chat}</span><span
+                class="font-mono text-xs">{site.whatsappDisplay}</span
+              ></span
+            >
+            <ArrowRight class="ml-auto size-5 shrink-0" aria-hidden="true" />
+          </a>
+        </li>
+        <li>
+          <a
+            href={site.instagram}
+            target="_blank"
+            rel="noopener"
+            class="card chamfer-sm flex items-center gap-4 bg-cream p-4 ring-1 ring-forest/10"
+          >
+            <span
+              class="icon-dot grid size-11 shrink-0 place-items-center rounded-full bg-sand/50"
+              ><svg
+                viewBox="0 0 24 24"
+                class="size-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+                ><rect x="3" y="3" width="18" height="18" rx="5"
+                ></rect><circle cx="12" cy="12" r="4"></circle><circle
+                  cx="17.3"
+                  cy="6.7"
+                  r="1"
+                  fill="currentColor"
+                  stroke="none"></circle></svg
+              ></span
+            >
+            <span
+              ><span class="block font-semibold">Instagram</span><span
+                class="font-mono text-xs">{site.instagramHandle}</span
+              ></span
+            >
+            <ArrowRight class="ml-auto size-5 shrink-0" aria-hidden="true" />
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div
+      class="chamfer bg-cream/90 p-5 shadow-xl shadow-forest/10 ring-1 ring-forest/10 backdrop-blur md:col-span-7 md:p-8"
+      data-reveal="right"
+    >
+      <ContactForm locale={locale} />
+    </div>
+  </div>
+</section>
