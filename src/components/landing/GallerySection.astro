@@ -1,0 +1,237 @@
+---
+import { Image } from 'astro:assets';
+import { ChevronLeft, ChevronRight } from '@lucide/astro';
+import { ui, type Locale } from '../../i18n/ui';
+import terrazaVista from '../../assets/images/terraza-vista.jpeg';
+import terrazaVertical from '../../assets/images/terraza-vertical.jpeg';
+import frontal from '../../assets/images/casa-frontal.jpeg';
+import lateral from '../../assets/images/casa-lateral.jpeg';
+import lateral2 from '../../assets/images/casa-lateral-2.jpeg';
+import aerea from '../../assets/images/casa-aerea.jpeg';
+import { wrap, sec } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const gallery = [
+  terrazaVista,
+  frontal,
+  lateral,
+  lateral2,
+  aerea,
+  terrazaVertical,
+];
+---
+
+<section id="galeria" class={sec}>
+  <div class={wrap} data-reveal>
+    <p class="tag mb-3">{t.hero.tags.gallery}</p>
+    <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+      <h2 class="h-line text-[2.1rem] md:text-6xl">{t.gallery.title}</h2>
+      <p class="max-w-sm">{t.gallery.note}</p>
+    </div>
+  </div>
+
+  <div
+    class="mt-6 md:mt-8"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label={t.gallery.title}
+    data-reveal="zoom"
+  >
+    <ul
+      id="car-track"
+      class="car-pad no-scrollbar relative flex snap-x snap-mandatory gap-3 overflow-x-auto py-4 md:gap-5"
+      tabindex="0"
+    >
+      {
+        gallery.map((img, i) => (
+          <li
+            class="car-slide shrink-0 snap-center"
+            aria-roledescription="slide"
+            aria-label={`${i + 1} / ${gallery.length}`}
+          >
+            <button
+              type="button"
+              class="gallery-btn frame-host group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-2xl shadow-forest/25 md:aspect-[16/10]"
+              aria-label={`${t.gallery.open}: ${t.gallery.items[i]}`}
+            >
+              <Image
+                src={img}
+                alt={t.gallery.items[i]}
+                width={1400}
+                widths={[600, 1000, 1400]}
+                sizes="(min-width: 768px) 56vw, 84vw"
+                loading={i < 2 ? 'eager' : 'lazy'}
+                class="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-[1.05]"
+              />
+              <span class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest/90 to-transparent p-4 pt-14 text-left text-cream md:p-6">
+                <span class="font-heading text-xl font-semibold md:text-3xl">
+                  {t.gallery.items[i]}
+                </span>
+              </span>
+              <span class="frame" aria-hidden="true" />
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+    <div class={`${wrap} mt-3 flex items-center gap-4`}>
+      <p class="font-mono text-sm font-medium" aria-live="polite">
+        <span id="car-now">1</span> / {gallery.length}
+      </p>
+      <div class="h-0.5 flex-1 overflow-hidden rounded-full bg-forest/15">
+        <div
+          id="car-bar"
+          class="h-full origin-left bg-forest transition-transform duration-500"
+          style={`transform:scaleX(${1 / gallery.length})`}
+        >
+        </div>
+      </div>
+      <button
+        type="button"
+        id="car-prev"
+        class="grid size-11 place-items-center rounded-full border border-forest transition-colors hover:bg-forest hover:text-cream"
+        aria-label={t.gallery.prev}
+        ><ChevronLeft class="size-5" aria-hidden="true" /></button
+      >
+      <button
+        type="button"
+        id="car-next"
+        class="grid size-11 place-items-center rounded-full bg-forest text-cream transition-colors hover:bg-forest/85"
+        aria-label={t.gallery.next}
+        ><ChevronRight class="size-5" aria-hidden="true" /></button
+      >
+    </div>
+  </div>
+</section>
+
+<dialog
+  id="lightbox"
+  class="m-auto max-h-[92vh] max-w-[94vw] overflow-hidden rounded-2xl bg-forest p-0 backdrop:bg-forest/90 backdrop:backdrop-blur-sm"
+>
+  <form method="dialog" class="relative">
+    <button
+      class="btn absolute right-3 top-3 z-10 bg-cream !px-4 !py-2 text-forest"
+      autofocus>{t.gallery.close}</button
+    >
+    <img
+      id="lightbox-img"
+      alt=""
+      class="max-h-[92vh] max-w-[94vw] object-contain"
+    />
+  </form>
+</dialog>
+
+<style is:global>
+  .car-pad {
+    --sw: 84vw;
+    padding-inline: calc((100% - var(--sw)) / 2);
+  }
+  .car-slide {
+    width: var(--sw);
+  }
+  @media (min-width: 768px) {
+    .car-pad {
+      --sw: min(56vw, 900px);
+    }
+  }
+  dialog[open] {
+    animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+</style>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const dlg = document.getElementById('lightbox') as HTMLDialogElement;
+  const big = document.getElementById('lightbox-img') as HTMLImageElement;
+  const track = document.getElementById('car-track')!;
+  const slides = Array.from(track.querySelectorAll<HTMLElement>('.car-slide'));
+  const now = document.getElementById('car-now')!;
+  const barEl = document.getElementById('car-bar')!;
+  let cur = 0;
+  const go = (i: number) => {
+    const s = slides[(i + slides.length) % slides.length];
+    track.scrollTo({
+      left: s.offsetLeft - (track.clientWidth - s.clientWidth) / 2,
+      behavior: reduce ? 'auto' : 'smooth',
+    });
+  };
+  const mark = () => {
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    let best = 0,
+      dist = Infinity;
+    slides.forEach((s, i) => {
+      const d = Math.abs(s.offsetLeft + s.clientWidth / 2 - mid);
+      if (d < dist) {
+        dist = d;
+        best = i;
+      }
+    });
+    cur = best;
+    slides.forEach((s, i) => s.classList.toggle('is-active', i === best));
+    now.textContent = String(best + 1);
+    barEl.style.transform = `scaleX(${(best + 1) / slides.length})`;
+  };
+  track.addEventListener('scroll', () => requestAnimationFrame(mark), {
+    passive: true,
+  });
+  let lastTouch = 0;
+  const hold = () => (lastTouch = Date.now());
+  ['pointerdown', 'wheel', 'touchmove'].forEach((ev) =>
+    track.addEventListener(ev, hold, { passive: true }),
+  );
+  document.getElementById('car-prev')!.addEventListener('click', () => {
+    hold();
+    go(cur - 1);
+  });
+  document.getElementById('car-next')!.addEventListener('click', () => {
+    hold();
+    go(cur + 1);
+  });
+  track.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      hold();
+      go(cur + 1);
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      hold();
+      go(cur - 1);
+    }
+  });
+  mark();
+  if (!reduce) {
+    let hovering = false,
+      visible = false;
+    new IntersectionObserver(([e]) => (visible = e.isIntersecting), {
+      threshold: 0.1,
+    }).observe(track);
+    track.addEventListener(
+      'pointerenter',
+      (e) => (hovering = e.pointerType === 'mouse'),
+    );
+    track.addEventListener('pointerleave', () => (hovering = false));
+    setInterval(() => {
+      if (visible && !hovering && !dlg.open && Date.now() - lastTouch > 4000)
+        go(cur + 1);
+    }, 3500);
+  }
+
+  // Lightbox
+  document.querySelectorAll<HTMLButtonElement>('.gallery-btn').forEach((b) =>
+    b.addEventListener('click', () => {
+      const img = b.querySelector('img')!;
+      big.src = img.currentSrc || img.src;
+      big.alt = img.alt;
+      dlg.showModal();
+    }),
+  );
+  dlg.addEventListener('click', (e) => {
+    if (e.target === dlg) dlg.close();
+  });
+</script>

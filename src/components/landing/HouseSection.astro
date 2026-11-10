@@ -1,0 +1,101 @@
+---
+import { Image } from 'astro:assets';
+import {
+  BedDouble,
+  Bath,
+  CookingPot,
+  Wifi,
+  Car,
+  Flame,
+  WashingMachine,
+  Trees,
+  Mountain,
+} from '@lucide/astro';
+import { ui, type Locale } from '../../i18n/ui';
+import frontal from '../../assets/images/casa-frontal.jpeg';
+import lateral from '../../assets/images/casa-lateral.jpeg';
+import { wrap } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const specIcons = {
+  rooms: BedDouble,
+  baths: Bath,
+  kitchen: CookingPot,
+  wifi: Wifi,
+  parking: Car,
+  grill: Flame,
+  laundry: WashingMachine,
+  hammocks: Trees,
+  view: Mountain,
+} as const;
+---
+
+<section id="casa" class={`${wrap} relative pb-12 pt-8 md:pb-20 md:pt-10`}>
+  <div
+    class="blob -right-24 top-1/3 size-96 bg-forest/30"
+    style="animation-delay:-6s"
+  >
+  </div>
+  <div class="grid items-center gap-10 md:grid-cols-12 md:gap-12">
+    <div class="relative pb-6 md:col-span-5" data-reveal="left">
+      <div class="frame-host scroll-zoom relative">
+        <Image
+          src={frontal}
+          alt={t.house.alt}
+          width={900}
+          widths={[480, 900]}
+          sizes="(min-width: 768px) 40vw, 92vw"
+          class="aspect-[16/11] w-full object-cover shadow-xl shadow-forest/25 md:aspect-[4/5]"
+        />
+        <span class="frame" aria-hidden="true"></span>
+      </div>
+      <div
+        class="float absolute -bottom-1 right-3 w-[42%] border-4 border-cream shadow-2xl shadow-forest/30 md:-right-6 md:w-[50%]"
+      >
+        <Image
+          src={lateral}
+          alt=""
+          width={500}
+          widths={[300, 500]}
+          sizes="(min-width: 768px) 20vw, 40vw"
+          class="aspect-[4/3] w-full object-cover"
+        />
+      </div>
+    </div>
+    <div class="md:col-span-7">
+      <div data-reveal>
+        <p class="tag mb-3">{t.hero.tags.house}</p>
+        <h2 class="h-line text-[2.1rem] md:text-6xl">{t.house.title}</h2>
+        <p class="mt-5 max-w-xl">{t.house.lead}</p>
+      </div>
+      <ul class="mt-7 grid grid-cols-2 gap-2.5 lg:grid-cols-3 md:gap-3">
+        {
+          Object.entries(t.house.specs).map(([key, [title, sub]], i) => {
+            const Icon = specIcons[key as keyof typeof specIcons];
+            return (
+              <li
+                class="card  chamfer-sm flex items-center gap-3 bg-cream p-3 ring-1 ring-forest/10 md:flex-col md:items-start md:gap-2 md:p-5"
+                data-reveal
+                style={`--d:${(i % 3) * 80 + Math.floor(i / 3) * 60}ms`}
+              >
+                <span class="icon-dot grid size-9 shrink-0 place-items-center rounded-full bg-sand/50 text-forest md:size-11">
+                  <Icon class="size-[18px] md:size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p class="text-[0.92rem] font-medium leading-tight md:font-heading md:text-2xl md:font-semibold">
+                    {title}
+                  </p>
+                  <p class="mt-1 hidden text-sm md:block">{sub}</p>
+                </div>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </div>
+</section>

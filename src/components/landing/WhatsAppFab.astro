@@ -1,0 +1,28 @@
+---
+import { ui, type Locale } from '../../i18n/ui';
+import { waLink, waIcon } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+---
+
+<a
+  id="fab"
+  href={waLink}
+  target="_blank"
+  rel="noopener"
+  aria-label={t.nav.fab}
+  class="fixed bottom-5 right-5 z-30 grid size-14 place-items-center rounded-full bg-forest text-cream shadow-xl shadow-forest/40"
+>
+  <span class="ping absolute inset-0 rounded-full bg-forest" aria-hidden="true"
+  ></span>
+  <svg
+    viewBox="0 0 24 24"
+    class="relative size-7"
+    fill="currentColor"
+    aria-hidden="true"><path d={waIcon}></path></svg
+  >
+</a>

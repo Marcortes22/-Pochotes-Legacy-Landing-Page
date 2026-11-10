@@ -1,0 +1,33 @@
+---
+import { Sprout } from '@lucide/astro';
+import { ui, type Locale } from '../../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const words = [
+  ...Object.values(t.house.specs).map((s) => s[0]),
+  ...t.exp.items.map((i) => i.title),
+];
+---
+
+<div class="overflow-hidden py-5 md:py-7" aria-hidden="true">
+  <div
+    class="marquee font-heading text-2xl font-semibold text-forest/80 md:text-4xl"
+  >
+    {
+      [0, 1].map(() => (
+        <div class="flex shrink-0 items-center">
+          {words.map((w) => (
+            <span class="flex items-center">
+              {w}
+              <Sprout class="mx-5 size-5 text-brown md:mx-8" />
+            </span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>

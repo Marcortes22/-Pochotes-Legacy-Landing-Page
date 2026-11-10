@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import { Footprints, Coffee, Trees, Flame } from '@lucide/astro';
+import { ui, type Locale } from '../../i18n/ui';
+import aerea from '../../assets/images/casa-aerea.jpeg';
+import { wrap, flies } from './shared';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const expIcons = [Footprints, Coffee, Trees, Flame];
+---
+
+<section
+  id="experiencias"
+  class="on-dark grain relative isolate mx-3 overflow-hidden bg-forest text-cream panel md:mx-8"
+>
+  <Image
+    src={aerea}
+    alt=""
+    width={1440}
+    widths={[720, 1440]}
+    sizes="100vw"
+    class="absolute inset-0 -z-10 h-full w-full object-cover opacity-[0.12] mix-blend-luminosity"
+  />
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+    {
+      flies
+        .slice(0, 9)
+        .map((f) => (
+          <span
+            class="firefly"
+            style={`left:${f.y}%;top:${f.x}%;width:${f.s}px;height:${f.s}px;animation-delay:-${f.d}s`}
+          />
+        ))
+    }
+  </div>
+  <div class={`${wrap} py-12 md:py-16`}>
+    <div data-reveal>
+      <p class="tag mb-3">{t.hero.tags.exp}</p>
+      <h2 class="h-line max-w-2xl text-[2.1rem] md:text-6xl">
+        {t.exp.title}
+      </h2>
+    </div>
+    <ul
+      class="mt-8 grid grid-cols-2 gap-2.5 md:mt-10 md:gap-4 lg:grid-cols-4"
+    >
+      {
+        t.exp.items.map((it, i) => {
+          const Icon = expIcons[i];
+          return (
+            <li
+              class="card rounded-2xl bg-cream/[0.07] p-4 ring-1 ring-inset ring-cream/15 hover:bg-cream/[0.12] md:p-6"
+              data-reveal
+              style={`--d:${i * 90}ms`}
+            >
+              <span class="icon-dot grid size-11 place-items-center rounded-full bg-sand/20 text-sand">
+                <Icon
+                  class="bob size-5"
+                  aria-hidden="true"
+                  style={`animation-delay:-${i}s`}
+                />
+              </span>
+              <h3 class="mt-4 text-2xl md:text-3xl">{it.title}</h3>
+              <p class="mt-1.5 text-sm leading-relaxed md:text-base">
+                {it.text}
+              </p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
